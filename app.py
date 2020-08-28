@@ -12,20 +12,24 @@ blockchain = Blockchain()
 
 @app.route('/chain', methods=['GET'])
 def full_chain():
-   response = {
-       'chain' : blockchain.chain,
-       'length' : len(blockchain.chain)
-   }
-   return jsonify(response), 200
+    """Return a full chain"""
+    response = {
+        'chain' : blockchain.chain,
+        'length' : len(blockchain.chain)
+    }
+    return jsonify(response), 200
 
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
+    """Make transaction"""
     values = request.get_json()
 
+    # Check for requested data
     required = ['sender','recipient','amount']
     if not all(k in values for k in required):
         return 'Missing values', 400
 
+    # Create new transaction
     index = blockchain.new_transaction(
         values['sender'], 
         values['recipient'], 
@@ -41,13 +45,13 @@ def mine():
     last_proof = last_block['proof']
     proof = blockchain.proof_of_work(last_proof)
 
-    # rewarding the miner for his contribution. 0 specifies new coin has been mined
+    # Reward the miner for his contribution. 0 specifies new coin has been mined
     blockchain.new_transaction(
         sender="0",
         recipient = node_identifier,
         amount = 1,
     )
-    # now create the new block and add it to the chain
+    # Create the new block and add it to the chain
     previous_hash = blockchain.hash(last_block)
     block = blockchain.new_block(proof, previous_hash)
 
